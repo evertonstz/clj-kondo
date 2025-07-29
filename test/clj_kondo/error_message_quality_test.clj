@@ -14,7 +14,7 @@
       (s/defn get-string :- s/Str [] 42)
       (s/defn get-number :- s/Int [] \"hello\")
       (s/defn get-boolean :- s/Bool [] :keyword)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (is (= 3 (count findings)) "Should detect all three type mismatches")
       
@@ -36,7 +36,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defn bad-maybe :- (s/maybe s/Str) [] 42)
       (s/defn bad-either :- (s/either s/Int s/Bool) [] \"wrong\")
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         (let [messages (map :message findings)]
@@ -58,7 +58,7 @@
       (s/defschema User {:name s/Str :age s/Int})
       (s/defn bad-user :- User [] {:name 123 :age \"not-number\"})
       (s/defn missing-keys :- User [] {:name \"john\"})
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         (let [messages (map :message findings)]
@@ -73,7 +73,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defn bad-vector :- [s/Str] [] [1 2 3])
       (s/defn bad-set :- #{s/Int} [] #{\"a\" \"b\"})
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         (let [messages (map :message findings)]
@@ -89,7 +89,7 @@
       (s/defn consistent1 :- s/Str [] 42)
       (s/defn consistent2 :- s/Int [] \"hello\")
       (s/defn consistent3 :- s/Bool [] :keyword)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (is (= 3 (count findings)) "Should detect all mismatches")
       
@@ -111,7 +111,7 @@
     (let [findings (lint! "
       (ns test (:require [schema.core :as s]))
       (s/defn problematic-function :- s/Str [] 42)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (is (= 1 (count findings)) "Should detect the mismatch")
       
@@ -126,7 +126,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defschema CustomType s/Str)
       (s/defn bad-custom :- CustomType [] 42)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         ;; Should preserve schema context when possible
@@ -142,7 +142,7 @@
       (s/defschema Person {:name s/Str :address Address})
       (s/defn bad-person :- Person [] 
         {:name \"John\" :address \"not-an-address\"})
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         ;; Should provide context about nested structure
@@ -160,7 +160,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defn no-nil :- s/Str [] nil)
       (s/defn needs-nil :- (s/maybe s/Str) [] 42)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         (let [messages (map :message findings)]
@@ -173,7 +173,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defn specific-from-any :- s/Str [x :- s/Any] x)
       (s/defn any-from-specific :- s/Any [x :- s/Str] x)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       ;; s/Any should generally be compatible with everything
       ;; If there are warnings, they should be reasonable
@@ -185,7 +185,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defschema TreeNode {:value s/Int :children [TreeNode]})
       (s/defn bad-tree :- TreeNode [] {:value \"not-int\" :children []})
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         ;; Should handle recursive schemas gracefully
@@ -212,7 +212,7 @@
       ;; Test performance and result quality
       (let [start-time (System/currentTimeMillis)
             findings (lint! large-schema-code
-                           '{:linters {:schema-type-mismatch {:level :warning}}})
+                           '{:linters {:prismatic-schema-mismatch {:level :warning}}})
             duration (- (System/currentTimeMillis) start-time)]
         
         ;; Should complete reasonably quickly (less than 5 seconds)

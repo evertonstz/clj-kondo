@@ -535,7 +535,7 @@
         (require 'clj-kondo.impl.findings)
         ((resolve 'clj-kondo.impl.findings/reg-finding!) ctx
          (utils/node->line (:filename ctx)
-                           expr :schema-type-mismatch
+                           expr :prismatic-schema-mismatch
                            (str "Schema type mismatch. Expected: " expected-label
                                 ", actual: " actual-label ".")))))))
 

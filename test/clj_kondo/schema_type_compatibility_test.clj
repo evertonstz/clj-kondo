@@ -15,7 +15,7 @@
       (s/defn multiply :- s/Int [a :- s/Int b :- s/Int] (* a b))
       (s/defn calculate :- s/Num [x :- s/Int] (+ x 5.5))
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
   
   (testing "Nilable type handling - should NOT warn"
     ;; These were failing before our nilable type fixes
@@ -25,7 +25,7 @@
       (s/defn optional-number :- (s/maybe s/Int) [x :- s/Int] (when (pos? x) x))
       (s/defn get-maybe :- (s/maybe s/Str) [] nil)
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
   
   (testing "Map compatibility with extra keys - should NOT warn"
     ;; Extra keys should be allowed
@@ -37,7 +37,7 @@
       (s/defn build-user :- UserSchema [data :- {:name s/Str :age s/Int :id s/Int}]
         (select-keys data [:name :age]))
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Schema reference resolution - should NOT warn"
     ;; Custom schema references should resolve properly
@@ -49,7 +49,7 @@
       (s/defn use-complex :- ComplexSchema [id :- s/Int data :- SimpleSchema] 
         {:id id :data data})
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Collection type compatibility - should NOT warn"
     ;; Collection element type compatibility
@@ -58,7 +58,7 @@
       (s/defn make-vector :- [s/Int] [nums :- [s/Num]] (mapv int nums))
       (s/defn process-set :- #{s/Str} [strs :- #{s/Any}] (set (map str strs)))
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Negative cases - SHOULD still warn about real mismatches"
     ;; These should continue to produce warnings
@@ -70,7 +70,7 @@
       (s/defn bad-map :- UserSchema [name :- s/Str] {:wrong \"structure\"})
       (s/defn bad-vector :- [s/Int] [] [\"not\" \"ints\"])
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}})]
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       ;; Should have warnings for actual type mismatches
       ;; NOTE: Collection element type checking is limited by current type inference
@@ -112,7 +112,7 @@
       (s/defn process-nested :- [[s/Int]] [data :- [[s/Num]]]
         (mapv #(mapv int %) data))
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Boundary and edge cases"
     ;; Test edge cases that might break
@@ -130,7 +130,7 @@
       ;; Double nilable
       (s/defn nil-edge-case :- (s/maybe (s/maybe s/Str)) [] nil)
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Performance with large schemas"
     ;; Ensure performance doesn't degrade with complex schemas
@@ -146,7 +146,7 @@
          :field9 \"c\" :field10 3 :field11 true :field12 :kw3
          :extra-field \"allowed\"})
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}}))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}}))))
 
   (testing "Regression tests for previously broken cases"
     ;; Ensure our fixes don't regress
@@ -164,4 +164,4 @@
       (s/defn regression-map :- RegressionSchema [id :- s/Int name :- s/Str extra :- s/Str]
         {:id id :name name :description extra :metadata {}})
     "
-    '{:linters {:schema-type-mismatch {:level :warning}}})))))
+    '{:linters {:prismatic-schema-mismatch {:level :warning}}})))))

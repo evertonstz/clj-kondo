@@ -25,7 +25,7 @@
       ;; Functions working with maybe types
       (s/defn process-maybe :- s/Str [maybe-str :- (s/maybe s/Str)]
         (or maybe-str \"default\"))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Maybe types should work correctly without false positives"))
   
   (testing "Either types and conditional returns"
@@ -48,7 +48,7 @@
           :number 42
           :flag true
           nil))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Either types should work correctly"))
   
   (testing "Union type error messages are readable"
@@ -57,7 +57,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defn bad-maybe :- (s/maybe s/Int) [] \"not-int-or-nil\")
       (s/defn bad-either :- (s/either s/Str s/Int) [] true)
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       
       (when (seq findings)
         ;; Check that error messages are human-readable
@@ -85,7 +85,7 @@
          
       (s/defn update-age :- FlexibleUser [user :- FlexibleUser age :- s/Int]
         (assoc user :age age))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Complex nested union types should work correctly")))
 
 (deftest union-type-edge-cases-test
@@ -102,7 +102,7 @@
       (s/defn maybe-complex :- (s/maybe {:name s/Str}) []
         (when (rand-nth [true false])
           {:name \"test\"}))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Edge case union types should work"))
   
   (testing "Union types with collection elements"
@@ -116,7 +116,7 @@
       
       (s/defn handle-collection :- s/Int [coll :- (s/either [s/Any] #{s/Any})]
         (count coll))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Union types with collections should work"))
   
   (testing "Deeply nested maybe and either combinations"
@@ -136,7 +136,7 @@
         
       (s/defn create-with-either :- SimpleNested []
         {:outer \"world\" :inner false})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Nested union combinations should work correctly")))
 
 (deftest union-type-performance-test
@@ -156,7 +156,7 @@
                "    4 'symbol\n"
                "    nil))\n")]
       (is (empty? (lint! many-types-code
-                         '{:linters {:schema-type-mismatch {:level :warning}}}))
+                         '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
           "Should handle schemas with many union alternatives efficiently")))
   
   (testing "Nested union performance"
@@ -176,5 +176,5 @@
           4 :keyword     ; Level3 -> Keyword
           5 []           ; Level4 -> Vector
           nil))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Should handle deeply nested union types efficiently")))

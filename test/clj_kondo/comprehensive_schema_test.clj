@@ -17,7 +17,7 @@
     (let [findings (lint! "
       (ns test (:require [schema.core :as s]))
       (s/defn get-flag :- s/Bool [] (if (> (rand) 0.5) true nil))
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       (when (seq findings)
         (let [message (:message (first findings))]
           (is (str/includes? message "boolean or nil")
@@ -27,7 +27,7 @@
     (let [findings (lint! "
       (ns test (:require [schema.core :as s]))
       (s/defn get-number :- s/Int [] \"not-a-number\")
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       (is (= 1 (count findings)) "Should detect the type mismatch")
       (let [message (:message (first findings))]
         (is (str/includes? message "Expected: integer")
@@ -40,7 +40,7 @@
       (ns test (:require [schema.core :as s]))
       (s/defschema UserSchema {:name s/Str :age s/Int})
       (s/defn create-user :- UserSchema [] {:name 42 :age \"not-number\"})
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       (when (seq findings)
         (let [message (:message (first findings))]
           (is (or (str/includes? message "name:")
@@ -109,7 +109,7 @@
       (s/defschema UserId CustomString)
       (s/defn get-user-id :- UserId [name :- s/Str] name)
       (s/defn process-id :- s/Str [id :- UserId] id)
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Custom schema chains should resolve correctly"))
   
   (testing "Schema redefinition handling"
@@ -119,7 +119,7 @@
       (s/defschema MyType s/Int)
       (s/defschema MyType s/Str)  ; Redefine as string
       (s/defn use-type :- MyType [] \"hello\")  ; Should use latest definition
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       ;; Should either have no findings or only redefinition warnings (not type mismatches)
       (is (every? #(or (str/includes? (:message %) "redefined var")
                        (not (str/includes? (:message %) "Schema type mismatch"))) 
@@ -134,7 +134,7 @@
       
       (ns test (:require [schema.core :as s] [other.ns]))
       (s/defn use-external :- other.ns/ExternalType [x :- s/Int] x)
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Cross-namespace schema references should work")))
 
 ;; =============================================================================
@@ -150,7 +150,7 @@
       (s/defn handle-nil :- (s/maybe s/Any) [] nil)
       (s/defn handle-any :- s/Any [] \"anything\")
       (s/defn handle-empty :- {} [] {})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Empty and nil schemas should work correctly"))
   
   (testing "Deeply nested schemas"
@@ -161,7 +161,7 @@
       (s/defschema Level3 {:data Level2})
       (s/defschema Level4 [Level3])
       (s/defn deep-nesting :- Level4 [] [{:data [42]}])
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Deeply nested schemas should resolve correctly"))
   
   (testing "Recursive schemas"
@@ -170,7 +170,7 @@
       (s/defschema TreeNode {:value s/Int :children [TreeNode]})
       (s/defn make-leaf :- TreeNode [value :- s/Int] 
         {:value value :children []})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Recursive schemas should be handled gracefully"))
   
   (testing "Invalid schema handling"
@@ -178,7 +178,7 @@
     (let [findings (lint! "
       (ns test (:require [schema.core :as s]))
       (s/defn broken-schema :- (this-is-not-a-schema) [] \"test\")
-    " '{:linters {:schema-type-mismatch {:level :warning}}})]
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}})]
       ;; Should not crash, may or may not produce warnings
       (is (or (empty? findings) (seq findings))
           "Invalid schemas should not crash the analyzer"))))
@@ -197,7 +197,7 @@
         (or data \"default\"))
       (s/defn handle-async :- (s/maybe s/Int) [result :- s/Any]
         (when (number? result) (int result)))
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Should work with async patterns"))
   
   (testing "Ring/HTTP handler patterns"
@@ -207,7 +207,7 @@
       (s/defschema Response {:status s/Int :body s/Str})
       (s/defn handler :- Response [req :- Request]
         {:status 200 :body \"OK\"})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Should work with Ring handler patterns"))
   
   (testing "Database/ORM patterns"
@@ -218,7 +218,7 @@
         (when (pos? id) {:id id :name \"test\" :email nil}))
       (s/defn create-user :- User [name :- s/Str]
         {:id (rand-int 1000) :name name :email nil})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Should work with database patterns")))
 
 ;; =============================================================================
@@ -236,7 +236,7 @@
                            (str "(s/defschema Schema" i " s/Str)\n"
                                 "(s/defn use-schema" i " :- Schema" i " [] \"test\")\n"))))]
       (is (empty? (lint! large-schema-code 
-                         '{:linters {:schema-type-mismatch {:level :warning}}}))
+                         '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
           "Should handle large numbers of schema definitions efficiently")))
   
   (testing "Complex nested structure performance"
@@ -246,5 +246,5 @@
         {:level1 {:level2 {:level3 {:level4 {:level5 s/Str}}}}})
       (s/defn build-complex :- ComplexNested []
         {:level1 {:level2 {:level3 {:level4 {:level5 \"deep\"}}}}})
-    " '{:linters {:schema-type-mismatch {:level :warning}}}))
+    " '{:linters {:prismatic-schema-mismatch {:level :warning}}}))
         "Should handle deeply nested structures efficiently")))
